@@ -45,19 +45,24 @@ function gerarFaturaStr (fatura, pecas) {
     function formatarMoeda(valor){
       return new Intl.NumberFormat("pt-BR",
                           { style: "currency", currency: "BRL",
-                            minimumFractionDigits: 2 }).format(valor);
+                            minimumFractionDigits: 2 }).format(valor/100);
     }
+
+    function calcularTotalFatura() {
+      return fatura.apresentacoes.reduce((total, apre) => total + calcularTotalApresentacao(apre), 0);
+    }
+
+    function calcularTotalCreditos() {
+      return fatura.apresentacoes.reduce((total, apre) => total + calcularCredito(apre), 0);
+    }
+
   
+    // corpo principal (após funções aninhadas)
     for (let apre of fatura.apresentacoes) {
-      let total = calcularTotalApresentacao(apre);
- 
-      // mais uma linha da fatura
-      faturaStr += `  ${getPeca(apre).nome}: ${formato(total/100)} (${apre.audiencia} assentos)\n`;
-      totalFatura += total;
-      creditos += calcularCredito(apre);
+        faturaStr += `  ${getPeca(apre).nome}: ${formatarMoeda(calcularTotalApresentacao(apre))} (${apre.audiencia} assentos)\n`;
     }
-    faturaStr += `Valor total: ${formato(totalFatura/100)}\n`;
-    faturaStr += `Créditos acumulados: ${creditos} \n`;
+    faturaStr += `Valor total: ${formatarMoeda(calcularTotalFatura())}\n`;
+    faturaStr += `Créditos acumulados: ${calcularTotalCreditos()} \n`;
     return faturaStr;
   }
 
